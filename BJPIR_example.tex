@@ -14,7 +14,8 @@
 %% \WarningFilter{latex}{Text page 6 contains only floats}
 
 \usepackage[T1]{fontenc}
-%% \usepackage{tipa}
+\usepackage{upgreek}
+\usepackage{breqn}
 
 \begin{document}
 
@@ -152,8 +153,242 @@ This procedure allowed us to obtain a set of 4,245 observations to which we appl
 \subsection{Time-Varying Exposure Cox Regressions}
 \label{sec3.2}
 
+Once the data had been encoded, the econometric and causal estimation strategy was divided into three stages to estimate the effect of low presidential approval on the dismissal of cabinet ministers, considering specific attributes and profiles as factors that may moderate this effect. We worked with observational Cox survival models before estimating the propensity score and matching the sample to estimate the effect of presidential approval correctly. Next, we performed an additional moderation analysis incorporating interaction terms. Finally, we conducted placebo tests and robustness checks to validate our results.
+
+For econometric estimation with observational data, we used an extension of Cox models with time as the dependent coefficient. This extension involved working with non-proportional hazards due to the data set’s structure. The equation is similar to that for proportional hazards with a baseline hazard $\lambda_{0}(t)$ that incorporates the effect of the $Z(t)$ intervals of the multiple $i$-$th$ observations, considering them as clusters. 
+
+First, we estimated a baseline model with our quarterly exposure variable to low presidential approval $D_{i}$, which takes a positive value at the end of the observed interval when approval is below 40 points. We took this methodological decision because, in Latin America, there is strong evidence of quadratic cyclical approval dynamics and smoothed plots for all administrations show that the lowest point during an average term after the honeymoon effect is 40-45 points \citep{Carlin2019b, Carlin2018}. It should be borne in mind that we were not able to use smoothed presidential approval as a continuous variable because a binary treatment variable is needed to estimate the propensity score and the average effect of treatment on those subjects who received it \citep{Austin2011, Ho2011}. In our case, we tested the effect of exposure to low approval on individual ministerial terminations. Potential concerns about the approval cut-off point were addressed ex-post via robustness checks.
+
+Our baseline model does not include any covariates or specifications. We then extended the equation incorporating moderating covariates $X_{j[i]}$, controlling for government and country fixed effects, including a vector of controls $C_{k}$ with $k$-$th$ potential confounders that are subsequently used to estimate the propensity score, and clustering observations:
+
+\begin{dmath} \label{EQ1} 
+\lambda(t_{i}) = \lambda_{0}(t_{i}) \; exp \, \left[ \beta_{t}Z_{i}(t) + \beta D_{i} + \sum_{j = 1}^{J} \gamma_{j} X_{j[i]} + \upzeta \, gov_{i} + \eta \, country_{i} +\sum_{k = 1}^{K} \upvartheta_{k}C_{k[i]} + \upvarepsilon_{i} \right]
+\end{dmath}
+
+Next, we incorporated the interaction effect between low presidential approval $D_{i}$ and our covariates $X_{j[i]}$, denoting $j$-$th$ type covariates that are incorporated in separate models with the term $\delta_{j} D_{i} \times X_{j[i]}$ (see baseline and extended equations in the \href{https://osf.io/asgbj/?view_only=144acd6c8eca4836880b57dee85ea4ff}{Supplementary Information file}). In practice, our empirical strategy involved testing three binary moderating effects of ministers’ profiles and attributes: (i) nonpartisan ministers; (ii) economists; and (iii) political party leaders.
+
+The vector $C_{k}$ ($K = 9$) considers the following variables: legislative ENP, a binary variable reflecting when consecutive presidential re-election is allowed, economic growth, inflation, and five binary variables measuring the quadratic patterns of the cyclical model of presidential approval. These patterns correspond to an initial honeymoon, a gradual deterioration and a slight recovery towards the end of the term \cite[][see also \citeauthor{Brace1992}, \citeyear{Brace1992}; \citeauthor{Carlin2018}, \citeyear{Carlin2018}]{Stimson1976}. Therefore, like \cite{Carlin2018}, we incorporated one dummy for each quarter of the honeymoon in the first year of the presidential term and two dummies for the quarter before the scheduled election and the penultimate quarter.
+
+These nine covariates are considered potential confounders for the propensity score estimation as they could affect both presidential approval and the decision to fire ministers. For example, legislative ENP reflects the complexity of the negotiation environment, which may impact not only approval by implying more significant political challenges and problems, but also the need to renew the cabinet in a quest to gather political support and advance the government agenda \citep{Chiba2015, Schleiter2020}. In addition, re-election may interact with the pre-election dummies and, when consecutive re-election is allowed, the president has incentives to send signals of good performance to the electorate, which may affect cabinet reshuffles decisions \citep[][see also \citeauthor{Beckman2020}, \citeyear{Beckman2020}]{Camerlo2015a}.
+
+Macroeconomic indicators, meanwhile, are often predictors of approval \citep{Carlin2018} and are also considered shocks that affect cabinet survival \citep{Camerlo2015a, MartinezGallardo2014}. Finally, binary variables of quadratic presidential approval patterns may affect cabinet stability: barring serious adverse selection problems in the inaugural cabinet appointments, presidents are unlikely to make major cabinet reshuffles during their honeymoon and, particularly, the first quarter. Similarly, the impending end of an administration, particularly with upcoming elections, can have various effects. Presidents may have incentives to send signals to the electorate, whether seeking re-election or supporting a candidate from the same party or coalition. However, an effect in the opposite direction is also possible because reshuffles may be limited by the depletion of the talent pool of potential ministers towards the end of a president’s term \citep[][see also \citeauthor{MartinezGallardo2015}, \citeyear{MartinezGallardo2015}]{Dewan2010}.
+
+\subsection{Propensity Score Analysis, Matching and Moderation Analysis}
+\label{sec3.3}
+
+To control for the non-random selection problem in our observational data, we next employed propensity score analysis and matching techniques to correct for imbalances and control for bias. We estimated the propensity score by performing a probit regression of periods of low presidential approval $D_{i}$ with the moderating covariates $X_{j[i]}$, government and country fixed effects and the potential confounders that make up the vector $C_{k}$:
+
+\begin{equation} \label{EQ2} 
+D_{i} = \upvarphi \left[ \alpha\ + \sum_{j = 1}^{J} \gamma_{j}X_{j[i]} + \upzeta \, gov_{i} + \eta \, country_{i} +\sum_{k = 1}^{K} \upvartheta_{k}C_{k[i]} + \upvarepsilon_{i} \right]
+\end{equation}
+
+We then classified $i$-$th$ observations into different propensity score balanced groups with the nearest neighbour algorithm without replacement to match observations with and without exposure to low approval $D_{i}$. We also used full matching to obtain samples with lower average propensity scores across pairs, avoiding discarding observations \citep{Austin2015, Hansen2004, Olmos2015}.
+
+\begin{figure}[ht]
+\caption{Standardised and Absolute Mean Differences Before and After Matching}
+\label{FIG2}
+\centering \vspace{2mm}
+\includegraphics[width=0.99\linewidth]{figures/loveplot.pdf} \\ \vspace{2mm}
+{\footnotesize Note: GDP growth, inflation and legislative ENP correspond to standardised average differences.}
+\end{figure}
+
+The assessment of covariate balance and matching suggests the choice of the sample with full matching where only legislative ENP and inflation fail to balance (\textcolor{blue}{Figure} \ref{FIG2}). Consequently, we integrated these variables as controls in the outcome models \citep{Austin2007, Olmos2015}. In addition, we incorporated the weights obtained with the matching process and adjusted for the $s$-$th$ clusters of the matching to test the effect of exposure to low presidential approval on individual ministerial terminations \citep{Austin2015, Ho2011}:
+
+\begin{equation} \label{EQ3} 
+\lambda(t_{i}) = \lambda_{0}(t_{i}) \; exp \, \left[ \beta_{t}w_{i}Z_{i}(t) + \beta w_{i}D_{i} + \upvartheta_{1} \, w_{i}ENP_{i} + \upvartheta_{4} \, w_{i}inflation_{i} + \upvarepsilon_{i[s]} \right]
+\end{equation}
+
+Subsequently, we included interaction terms between low approval $D_{i}$ and our moderation factors $X_{j[i]}$, using $\delta_{j} w_{i} D_{i} \times X_{j[i]}$ in separate models to perform the moderation analysis (extended equations are available in the \href{https://osf.io/asgbj/?view_only=144acd6c8eca4836880b57dee85ea4ff}{Supplementary Information file}).
+
+\subsection{Placebo Tests and Robustness Checks}
+\label{sec3.4}
+
+We incorporated standard statistical tests in all estimations to evaluate the models. For example, Akaike Information Criterion (AIC) and variance inflation factor (VIF) were calculated for all models to assess prediction error and multicollinearity. In addition, we incorporated the C-Index, which accounts for the proportion of all pairs of observations in which the model adequately predicted individual termination \citep[][see also \citeauthor{Adolph2020}, \citeyear{Adolph2020}]{Harrell1996}. It should be noted that, in general, Cox regressions must meet the assumption of proportional hazards \citep{BoxSteffensmeier2004}. However, as this is a time-dependent data set, the hazard is non-proportional. 
+
+To ensure the plausibility of our identification strategy, we conducted a placebo test with the treatment-altered $\widetilde{D}_{i}$ in the propensity score and matching analysis. The altered measure involved considering periods when presidential approval exceeded the 60\% threshold, so neither the placebo nor its interactions with moderating covariates were expected to be significant.
+
+As a robustness test, we used a stricter definition of the technical profile than merely considering economists, preferring a combination with partisan leadership, which the literature usually defines as a political technocrat or technopol \citep{GonzalezBustamante2018, Joignant2011}. In addition, we used educational level, defined as holding a PhD, as an alternative measure of technical profile.\footnote{There is no complete agreement on operationalising the technocratic phenomenon in terms of profiles. According to some authors, it can be extended to the social sciences in general while others associate it with agents specialised in economics and others again highlight the use of ordered measurements based on educational level \citep{Camerlo2015b, Schneider1998, Silva2006}. We have used a PhD degree to avoid excluding cases such as Fernando Henrique Cardoso when he was Minister of Finance.} We also added the sex and age of ministers as controls and confounders. In our main models, these variables are not considered because, although they may affect a minister’s performance and thus his likelihood of remaining in the cabinet, they are unlikely to affect presidential approval. Finally, we tested smoothed presidential approval as a continuous variable and alternative cut-off points of low approval with time-varying Cox regressions (see the \href{https://osf.io/asgbj/?view_only=144acd6c8eca4836880b57dee85ea4ff}{Supplementary Information file} for further details and additional checks).
+
+\section{Results}
+\label{sec4}
+
+\subsection{Estimating the Effect of Low Approval on the Dismissal of Ministers}
+\label{sec4.1}
+
+Our main results show that, in periods of low presidential approval, the risk of dismissal of cabinet ministers increases by 135.1\% compared to regular periods. However, nonpartisan ministers are better protected during these periods, with approximately only one in five being removed from the cabinet during a crisis period compared to partisan ministers. Details of these findings are set out below. 
+
+First, in this subsection, we present the primary analysis of the effect of low approval on cabinet dismissal. Then, in the following subsection, we look in greater depth at the moderation analysis for individual attributes. Finally, we present the placebo tests and a summary of our robustness checks.
+
+\textcolor{blue}{Table} \ref{TAB1} compares our baseline model with the survival regressions for time-varying exposure to periods of low approval with the observational data and the matched sample. The coefficient of low approval is positive and significant in the three models, increasing the risk of ministerial dismissal. By exponentiating these coefficients, we obtain the hazard ratio estimate, finding that the matching allowed for a bias correction of 16.2\% compared to the unmatched model and 20.6\% compared to the baseline model: $e^{\beta} = 2.351$ ($p = 0.001$, 95\% CI $[1.395, 3.962]$). This result implies a 135.1\% increase in the risk of individual ministerial termination during periods of low approval. With this result, we accept the {\itshape Low Approval Hypothesis}.
+
+\begin{table}[h] \centering 
+  \caption{Time-Varying Exposure Cox Regressions and Survival Outcome Model After Matching for Presidential Approval on Individual Ministerial Terminations} 
+  \label{TAB1} 
+\begin{tabular}{@{\extracolsep{5pt}}lccc} 
+\\[-1.8ex] \hline \\[-1.8ex] 
+ & Model I & Model II & Model III \\ 
+\midrule\\[-1.8ex] 
+ \multirow{2}{*}{Low Approval ($<$ 40\%)} & 0.668$^{\star\star\star}$ & 0.705$^{\star\star\star}$ & 0.855$^{\star\star\star}$ \\ 
+  & (0.135) & (0.231) & (0.194) \\ \midrule
+ Matching & Before & Before & Full \\ 
+Sub. Clustering & No & No & Yes \\ \midrule
+Moderation Covariates & No & Yes & PS \\ 
+Legislative ENP & No & Yes & PS/Yes \\ 
+Re-Election Allowed & No & Yes & PS \\ 
+GDP & No & Yes & PS \\ 
+Inflation & No & Yes & PS/Yes \\ 
+Quadratic Approval Pattern & No & Yes & PS \\ 
+Government FE & No & Yes & PS \\ 
+Country FE & No & Yes & PS \\ 
+Obs. Clustering & No & Yes & PS \\ \midrule
+Log-Rank & 23.333$^{\star\star\star}$ & 113.624$^{\star\star\star}$ & 22.037$^{\star\star\star}$ \\ 
+AIC & 2,746.625 & 2,696.303 & 1,551.838 \\ 
+C-Index & 0.573 & 0.672 & 0.578 \\ 
+VIF & 1.001 & 1.084 & 3.470 \\ \midrule
+Events & 256 & 256 & 256 \\ 
+$N$ & 4,245 & 4,245 & 4,245 \\ 
+Log Likelihood & $-$1,372.313 & $-$1,328.151 & $-$772.919 \\ 
+\bottomrule \\[-1.8ex] 
+\end{tabular} \\
+{\footnotesize $^{\star}$ $p \leq 0.1$; $^{\star\star}$ $p \leq 0.05$; $^{\star\star\star}$ $p \leq 0.01$ \\
+Note: Standard error (model I), clustered standard error (model II) and cluster-robust standard error (model III) in parentheses. PS: propensity score; ENP: effective number of parties; GDP: gross domestic product; FE: fixed effects; AIC: Akaike Information Criterion; VIF: variance inflation factor.} 
+\end{table} 
+
+\subsection{Moderation Analysis of Exposure to Low Approval}
+\label{sec4.2}
+
+In the same way as for \textcolor{blue}{Table} \ref{TAB1}, \textcolor{blue}{Table} \ref{TAB2} shows three models before matching and three models after the adjustment. These models integrate moderation covariates $X_{j[i]}$ in two-way interactions with exposure to low presidential approval. The only profile that generates protection during periods of low approval is that of nonpartisan ministers, both in the unmatched model and after the application of propensity score and full matching. 
+
+Model IV corrects the bias of model I by 52\%: $e^{\beta} = 0.222$ ($p = 0.018$, 95\% CI $[0.064, 0.771]$). This evidence suggests that just over one-fifth of nonpartisan ministers are removed from the cabinet in periods of low approval compared to partisan ministers. This result allows us to accept the {\itshape Nonpartisan Hypothesis} and reject the {\itshape Technocracy Hypothesis} and the {\itshape Political Capital Hypothesis} since the likelihood of being removed from the cabinet during periods of low presidential approval does not decrease for ministers who are economists or party leaders.
+
+\begin{table}[!htbp] \centering 
+  \caption{Time-Varying Exposure Cox Regressions and Survival Outcome Models After Matching for Moderation Analysis of Individual Ministerial Terminations} 
+  \label{TAB2} 
+ \resizebox{\textwidth}{!}{%
+\begin{tabular}{@{\extracolsep{5pt}}lcccccc} 
+\\[-1.8ex] \hline \\[-2.4ex] 
+\\[-1.8ex] & \multicolumn{3}{c}{Time-Varying Cox Regressions} &  \multicolumn{3}{c}{Survival Outcome Models} \\ [1ex]
+ & Model I & Model II & Model III & Model IV & Model V & Model VI \\ 
+\midrule\\[-1.8ex] 
+ Low Approval & 0.877$^{\star\star\star}$ & 0.736$^{\star\star\star}$ & 0.618$^{\star\star}$ & 1.381$^{\star\star\star}$ & 0.941$^{\star\star\star}$ & 0.672$^{\star}$ \\ 
+  ($<$ 40\%)  & (0.240) & (0.238) & (0.258) & (0.232) & (0.211) & (0.233) \\ 
+    \multirow{2}{*}{Nonpartisan} & $-$0.240 &  &  & 0.476 &  &  \\ 
+  & (0.215) &  &  & (0.261) &  &  \\ 
+    \multirow{2}{*}{Economist} &  & $-$0.049 &  &  & 0.230 &  \\ 
+  &  & (0.207) &  &  & (0.301) &  \\ 
+    \multirow{2}{*}{Party Leader} &  &  & 0.241 &  &  & $-$0.008 \\ 
+  &  &  & (0.168) &  &  & (0.263) \\ 
+  Low Approval & $-$0.771$^{\star\star}$ &  &  & $-$1.504$^{\star\star}$ &  &  \\ 
+  $\times$ Nonpartisan & (0.328) &  &  & (0.362) &  &  \\ 
+  Low Approval &  & $-$0.192 &  &  & $-$0.414 &  \\ 
+  $\times$ Economist &  & (0.336) &  &  & (0.400) &  \\ 
+  Low Approval &  &  & 0.186 &  &  & 0.503 \\ 
+  $\times$ Party Leader &  &  & (0.272) &  &  & (0.339) \\ \midrule
+ Matching & Before & Before & Before & Full & Full & Full \\ 
+Sub. Clustering & No & No & No & Yes & Yes & Yes \\ \midrule
+Legislative ENP & Yes & Yes & Yes & PS/Yes & PS/Yes & PS/Yes \\ 
+Re-Election Allowed & Yes & Yes & Yes & PS & PS & PS \\ 
+GDP & Yes & Yes & Yes & PS & PS & PS \\ 
+Inflation & Yes & Yes & Yes & PS/Yes & PS/Yes & PS/Yes \\ 
+Quadratic Approval & \multirow{2}{*}{Yes} & \multirow{2}{*}{Yes} & \multirow{2}{*}{Yes} & \multirow{2}{*}{PS} & \multirow{2}{*}{PS} & \multirow{2}{*}{PS} \\ 
+Pattern & & & & & & \\ 
+Government FE & Yes & Yes & Yes & PS & PS & PS \\ 
+Country FE & Yes & Yes & Yes & PS & PS & PS \\ 
+Obs. Clustering & Yes & Yes & Yes & PS & PS & PS \\ \midrule
+Log-Rank & 125.081$^{\star\star\star}$ & 98.428$^{\star\star\star}$ & 105.662$^{\star\star\star}$ & 48.957$^{\star\star\star}$ & 23.140$^{\star\star\star}$ & 29.086$^{\star\star\star}$ \\ 
+AIC & 2,690.591 & 2,708.697 & 2,703.819 & 1,533.027 & 1,554.774 & 1,550.733 \\ 
+C-Index & 0.683 & 0.663 & 0.668 & 0.657 & 0.607 & 0.622 \\ 
+VIF & 1.081 & 1.082 & 1.078 & 3.482 & 3.498 & 3.474 \\ \midrule
+Events & 256 & 256 & 256 & 256 & 256 & 256 \\ 
+$N$ & 4,245 & 4,245 & 4,245 & 4,245 & 4,245 & 4,245 \\ 
+Log Likelihood & $-$1,326.295 & $-$1,335.349 & $-$1,332.910 & $-$761.513 & $-$772.387 & $-$770.366 \\ 
+\bottomrule\\[-1.8ex] 
+\end{tabular} 
+} \\
+{\footnotesize $^{\star}$ $p \leq 0.1$; $^{\star\star}$ $p \leq 0.05$; $^{\star\star\star}$ $p \leq 0.01$ \\
+Note: Clustered standard errors (models I, II and III) and cluster-robust standard errors (models IV, V and VI) in parentheses. PS: propensity score; ENP: effective number of parties; GDP: gross domestic product; FE: fixed effects; AIC: Akaike Information Criterion; VIF: variance inflation factor.} 
+\end{table} 
+
+To deepen the scope of the test of the {\itshape Nonpartisan Hypothesis}, \textcolor{blue}{Figure} \ref{FIG3} plots the risk predicted by the moderation analysis of model IV in the matched sample, considering the interaction between partisan and nonpartisan ministers in periods of below and above 40\% presidential approval. The risk for partisan ministers is significantly higher in periods of crisis. In contrast, the risk is comparatively lower for nonpartisan ministers, and there is no significant difference depending on the level of approval. Even in periods with approval below 40\%, the CI and the risk of cabinet dismissal tend to decrease.
+
+\begin{figure}[ht]
+\caption{Predicted Risk of Presidential Approval on Individual Nonpartisan and Partisan Minister Terminations}
+\label{FIG3}
+\centering %% \vspace{2mm}
+\includegraphics[width=0.9\linewidth]{figures/risk_scores.pdf} \\ %% \vspace{2mm}
+%% {\footnotesize Source: Compiled by author.}
+\end{figure}
+
+\subsection{Placebo and Additional Tests}
+\label{sec4.3}
+
+Finally, \textcolor{blue}{Table} \ref{TAB3} presents the results of our placebo analysis which shows that there is no effect on individual ministerial termination. There are also no significant relationships in the two-way interactions between $\widetilde{D}_{i}$ and the moderation covariates $X_{j[i]}$. This result allows us to reaffirm the plausibility of our primary analyses. It also points to the need for further study of the role of technocrats and party leaders in cabinets during times of high presidential approval. Our results suggest that technocrats are less at risk of removal when the president has greater citizen support, while the opposite is true for party leaders. The latter makes theoretical sense since a strong president has greater bargaining power and, therefore, less need for strong political leaders in the cabinet. However, the causal mechanism operating in the protection of technocrats requires further investigation. \cite{Camerlo2015b} observed a similar effect in single-party governments and associated it with successful policies.
+
+Robustness tests, available in the \href{https://osf.io/asgbj/?view_only=144acd6c8eca4836880b57dee85ea4ff}{Supplementary Information file} with figures assessing the balance of their covariates and placebo tests, show the same patterns as our primary analysis, with a slightly more pronounced moderating effect in the case of nonpartisan ministers. This again confirms the {\itshape Nonpartisan Hypothesis}: $e^{\beta} = 0.159$ ($p = 0.002$, 95\% CI  $[0.051, 0.499]$). In addition, the alternative covariates of technopol and a PhD degree are not significant, and all our robustness checks on approval are as expected: lower presidential approval increases risk in the cabinet.
+
+\begin{table}[!htbp] \centering 
+  \caption{Survival Placebo Outcome Models After Matching} 
+  \label{TAB3} 
+\begin{tabular}{@{\extracolsep{5pt}}lccc} 
+\\[-1.8ex] \hline \\[-1.8ex] 
+ & Model I & Model II & Model III \\ 
+\midrule\\[-1.8ex] 
+  \multirow{2}{*}{Placebo (Approval $>$ 60\%)} & $-$0.298 & $-$0.360 & $-$0.139 \\ 
+  & (0.266) & (0.266) & (0.333) \\ 
+  \multirow{2}{*}{Nonpartisan} & $-$0.927 &  &  \\ 
+  & (0.147) &  &  \\ 
+  \multirow{2}{*}{Economist} &  & $-$2.372$^{\star\star\star}$ &  \\ 
+  &  & (0.314) &  \\ 
+  \multirow{2}{*}{Party Leader} &  &  & 1.435$^{\star\star}$ \\ 
+  &  &  & (0.087) \\ 
+  \multirow{2}{*}{Placebo $\times$ Nonpartisan} & 0.521 &  &  \\ 
+  & (0.633) &  &  \\ 
+  \multirow{2}{*}{Placebo $\times$ Economist} &  & 1.769 &  \\ 
+  &  & (0.805) &  \\ 
+  \multirow{2}{*}{Placebo $\times$ Party Leader} &  &  & $-$0.314 \\ 
+  &  &  & (0.399) \\ \midrule
+ Matching & Full & Full & Full \\ 
+Sub. Clustering & Yes & Yes & Yes \\ \midrule
+Legislative ENP & PS/Yes & PS/Yes & PS/Yes \\ 
+Re-Election Allowed & PS & PS & PS \\ 
+GDP & PS/Yes & PS/Yes & PS/Yes \\ 
+Inflation & PS/Yes & PS/Yes & PS/Yes \\ 
+Quadratic Approval Pattern & PS/Yes & PS/Yes & PS/Yes \\ 
+Government FE & PS/Yes & PS/Yes & PS/Yes \\ 
+Country FE & PS/Yes & PS/Yes & PS/Yes \\ 
+Obs. Clustering & PS & PS & PS \\ \midrule
+Log-Rank & 173.350$^{\star\star\star}$ & 223.399$^{\star\star\star}$ & 432.719$^{\star\star\star}$ \\ 
+AIC & 7,985.389 & 7,901.208 & 7,790.479 \\ 
+C-Index & 0.656 & 0.674 & 0.763 \\ 
+VIF & 3.338 & 3.350 & 3.363 \\ \midrule
+Events & 256 & 256 & 256 \\ 
+$N$ & 4,215 & 4,215 & 4,215 \\ 
+Log Likelihood & $-$3,983.695 & $-$3,941.604 & $-$3,886.240 \\ 
+\bottomrule \\[-1.8ex] 
+\end{tabular} \\
+{\footnotesize $^{\star}$ $p \leq 0.1$; $^{\star\star}$ $p \leq 0.05$; $^{\star\star\star}$ $p \leq 0.01$ \\
+Note: Cluster-robust standard errors in parentheses. PS: propensity score; ENP: effective number of parties; GDP: gross domestic product; FE: fixed effects; AIC: Akaike Information Criterion; VIF: variance inflation factor.}
+\end{table} 
+
+\section{Discussion}
+\label{sec5}
+
+When a president reshuffles her cabinet, there are a number of outcomes that may denote a strategic decision to make corrections in the face of stochastic events. This paper focuses on periods of low presidential approval in Brazil and Chile between 1990 and 2014. Our central argument is that the risk of a minister’s removal increases during periods of low presidential approval. However, the risk may be moderated if a minister has attributes and a profile in line with the presidential strategy during the approval crisis. 
+
+Our main findings allow us to test our {\itshape Low Approval Hypothesis}: the risk increases by 135.1\% compared to regular periods. We also test our {\itshape Nonpartisan Hypothesis} since nonpartisan ministers are better protected during these periods: only one in five is removed from the cabinet in an approval crisis compared to partisan ministers. This evidence is in line with our expectation that nonpartisan appointments could denote a presidential strategy to limit moral hazard and agency loss in turbulent times. An alternative explanation could be that partisan ministers abandon the cabinet when the government is unpopular, as suggested by \cite{Camerlo2015b}. However, it is important to consider that the two countries analysed had multi-party coalitions at a time when government coalitions had not collapsed and it is, therefore, likely that our findings indicate a strategy to deal with agency problems.
+
+Both main results were obtained from the matched sample and we have, therefore, controlled for imbalances and the absence of counterfactuals. It is important to note that the matching allowed a 20.6\% and 52\% adjustment for the main and moderation effects, respectively. This procedure of bias correction using the survival approach is a novel methodological contribution that focuses on straightforward measurement of ministers’ profiles, improving specification in the modelling processes and avoiding empirically complex measures of attributes. This contribution connects to our theoretical contribution of offering an approachable conceptualisation of ministerial profiles grounded in presidential strategies in the face of approval crises.
+
+Our placebo tests and robustness checks confirm our findings. We see that technocrats are less at risk when presidents have high approval, and the opposite is the case for party leaders. These side findings suggest that administrations with higher approval may be less politicised and exposed to patronage. Finally, the {\itshape Technocracy Hypothesis} and the {\itshape Political Capital Hypothesis} were rejected. This rejection does not necessarily mean that these are not relevant profiles and attributes but rather that presidents prefer to limit moral hazard during periods of low approval. This preference is consistent with the greater autonomy they possess compared to prime ministers, a situation that translates into a great propensity and ability to appoint and protect independent and loyal ministers at times of crisis.
+
 \bibliographystyle{apalike}
 \bibliography{refs/BIB-Ministers-Approval}
 \addcontentsline{toc}{section}{References}
+
+\section*{Additional Information}
+
+\subsection*{Acknowledgements}
+
+I am grateful to Petra Schleiter, Radoslaw Zubek, David Doyle, Stephen Whitefield and Moshe Ben Hamo Yeger for their substantial theoretical and methodological comments. I also thank Adriano Codato, Renato Perissinotto and Carla Cisternas for their valuable comments on early design versions. Preliminary versions of the observational nonparametric models and some deprecated parametric versions of this article were presented at the International Symposium on Ministers and Ministries at the Universidade Federal do Paraná, Curitiba 2018, and at the XXXVII Congress of the Latin American Studies Association, Boston 2019. In addition, the casual identification strategy was presented at the Pembroke College Research Design Workshop at the University of Oxford, Oxford 2020, and at the XXVI World Congress of Political Science, virtual 2021.
 
 \end{document}
